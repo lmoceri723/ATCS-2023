@@ -14,6 +14,9 @@ class Player:
         self.height = height
         self.speed = 1
         self.color = (0, 0, 255)
+        
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, (self.x * self.width, self.y * self.height, self.width, self.height))
                     
     def move(self, direction):
         new_x = self.x
