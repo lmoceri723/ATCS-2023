@@ -33,9 +33,9 @@ class Game:
         self.player = Player(self.board, 800 // self.board_size, 800 // self.board_size)
         self.ai = EnemyAI(self.player)
         
-        # self.power_ups = []
-        # for _ in range(4):
-        #     self.power_ups.append(PowerUp(self.ai))
+        self.power_ups = []
+        for _ in range(4):
+            self.power_ups.append(PowerUp(self.ai))
         
     def draw(self):
         # Update the screen
@@ -45,8 +45,8 @@ class Game:
         self.ai.draw(self.screen)
         self.ai.draw_state(self.screen)
         self.draw_timer()
-        # for power_up in self.power_ups:
-        #     power_up.draw(self.screen)
+        for power_up in self.power_ups:
+            power_up.draw(self.screen)
         
         pygame.display.flip()
     
@@ -93,6 +93,12 @@ class Game:
         
         if x_difference <= 1 and y_difference <= 1:
             return True
+        
+    def player_on_power_up(self):
+        for power_up in self.power_ups:
+            if self.player.x == power_up.x and self.player.y == power_up.y:
+                return power_up
+        return False
 
     def play(self):
         # Game loop
@@ -126,6 +132,11 @@ class Game:
             if self.player_caught():
                 self.game_over("AI caught you!")
                 running = False
+                
+            if self.player_on_power_up():
+                power_up = self.player_on_power_up()
+                power_up.collect()
+                self.power_ups.remove(power_up)
                 
             if self.timer <= 0:
                 self.game_over("You win!")

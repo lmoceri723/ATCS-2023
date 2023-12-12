@@ -10,9 +10,9 @@ class PowerUp:
         
         self.x = random.randint(0, self.board.width - 1)
         self.y = random.randint(0, self.board.width - 1)
-        while self.board.get_position(self.x, self.y) != 0:
-            self.x = random.randint(0, self.board.width - 1)
-            self.y = random.randint(0, self.board.width - 1)
+        # while self.board.get_position(self.x, self.y) != 0:
+        #     self.x = random.randint(0, self.board.width - 1)
+        #     self.y = random.randint(0, self.board.width - 1)
             
         self.board.fill_position(self.x, self.y, 4)
 
