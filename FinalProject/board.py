@@ -9,7 +9,7 @@ class Board:
         
         self.grid = [[' ' for _ in range(self.width)] for _ in range(self.width)]
         # Read in the board from board.txt
-        f = open("board.txt", "r")
+        f = open("FinalProject/board.txt", "r")
         for i in range(self.width):
             line = f.readline()
             for j in range(self.width):

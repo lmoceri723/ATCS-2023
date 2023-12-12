@@ -2,6 +2,7 @@ import pygame
 from board import Board
 from player import Player
 from ai import EnemyAI
+from powerup import PowerUp
 
 class Game:
     def __init__(self):
@@ -32,6 +33,10 @@ class Game:
         self.player = Player(self.board, 800 // self.board_size, 800 // self.board_size)
         self.ai = EnemyAI(self.player)
         
+        # self.power_ups = []
+        # for _ in range(4):
+        #     self.power_ups.append(PowerUp(self.ai))
+        
     def draw(self):
         # Update the screen
         self.screen.fill(self.screen_color)
@@ -40,6 +45,9 @@ class Game:
         self.ai.draw(self.screen)
         self.ai.draw_state(self.screen)
         self.draw_timer()
+        # for power_up in self.power_ups:
+        #     power_up.draw(self.screen)
+        
         pygame.display.flip()
     
     def draw_timer(self):
