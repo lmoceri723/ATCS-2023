@@ -15,7 +15,7 @@ class EnemyAI:
         self.slow = False  # Set the enemy's slow status
         self.phase = False  # Set the enemy's phase status
         
-        self.old_position_value = None  # Set the enemy's old position value
+        self.old_position_value = 0  # Set the enemy's old position value
 
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 0, 0), (self.x * self.board.spot_size, self.y * self.board.spot_size, self.board.spot_size, self.board.spot_size))
@@ -59,10 +59,9 @@ class EnemyAI:
         else:
             if random.randint(1, 5) == 1:
                 self.phase = False
-                self.old_position_value = None
+                self.old_position_value = 0
     
     def move(self):
-
         self.process_random_phase()
             
         if self.process_freeze() == "freeze":
@@ -112,3 +111,15 @@ class EnemyAI:
                 self.board.fill_position(self.x, self.y, 0)
                 self.board.fill_position(new_x, new_y, 3)
                 self.x, self.y = new_x, new_y
+                
+        self.board.load_board()
+                
+    def reset(self):
+        self.x = 0
+        self.y = 0
+        self.board.fill_position(self.x, self.y, 3)
+        
+        self.clock = 0
+        self.slow = False
+        self.phase = False
+        self.old_position_value = 0

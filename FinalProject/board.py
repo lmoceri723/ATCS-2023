@@ -9,13 +9,16 @@ class Board:
         
         self.grid = [[' ' for _ in range(self.width)] for _ in range(self.width)]
         # Read in the board from board.txt
+        self.load_board()
+
+    def load_board(self):
         f = open("FinalProject/board.txt", "r")
         for i in range(self.width):
             line = f.readline()
             for j in range(self.width):
                 if line[j] == "-":
                     self.fill_position(i, j, 2)
-
+        
     def draw(self, screen):
         for x in range(self.width):
             for y in range(self.width):
@@ -35,3 +38,7 @@ class Board:
         
     def get_position(self, row, col):
         return self.grid[row][col]
+
+    def reset(self):
+        self.grid = [[' ' for _ in range(self.width)] for _ in range(self.width)]
+        self.load_board()

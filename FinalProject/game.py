@@ -36,17 +36,50 @@ class Game:
         self.power_ups = []
         for _ in range(4):
             self.power_ups.append(PowerUp(self.ai))
+            
+        self.scene = "title"
         
     def draw(self):
         # Update the screen
-        self.screen.fill(self.screen_color)
-        self.board.draw(self.screen)
-        self.player.draw(self.screen)
-        self.ai.draw(self.screen)
-        self.ai.draw_state(self.screen)
-        self.draw_timer()
-        for power_up in self.power_ups:
-            power_up.draw(self.screen)
+        if self.scene == "game":
+            self.screen.fill(self.screen_color)
+            self.board.draw(self.screen)
+            for power_up in self.power_ups:
+                power_up.draw(self.screen)
+            self.player.draw(self.screen)
+            self.ai.draw(self.screen)
+            self.ai.draw_state(self.screen)
+            self.draw_timer()
+            pygame.display.flip()
+        elif self.scene == "title":
+            self.screen.fill(self.screen_color)
+            self.draw_title()
+            pygame.display.flip()
+            
+    def draw_title(self):
+        # Create a font object
+        font = pygame.font.Font('freesansbold.ttf', 32)
+        
+        # Create a text surface object
+        text = font.render('Cross Country: The Game', True, (0, 0, 0), (255, 255, 255))
+        instructions = [
+            font.render("Instructions:", True, (0, 0, 0)),
+            font.render("You are the blue character.", True, (0, 0, 0)),
+            font.render("Use the arrow keys to move.", True, (0, 0, 0)),
+            font.render("Avoid the red AI.", True, (0, 0, 0)),
+            font.render("Collect the light blue power ups to freeze the AI.", True, (0, 0, 0)),
+            font.render("You have 30 seconds to survive.", True, (0, 0, 0)),
+            font.render("Press space to play.", True, (0, 0, 0)),
+]
+        # Draw the text object on the screen followed by the instructions
+        # Make the title at the top
+        # Make the instructions below the title with a gap inbetween the title and instructions
+        # Make the instructions fit on the screen
+        
+        self.screen.blit(text, (self.screen_width // 2 - 200, self.screen_height // 2 - 200))
+        for i in range(len(instructions)):
+            self.screen.blit(instructions[i], (20, self.screen_height // 2 - 100 + i * 50))
+        
         
         pygame.display.flip()
     
@@ -99,50 +132,79 @@ class Game:
             if self.player.x == power_up.x and self.player.y == power_up.y:
                 return power_up
         return False
+    
+    def reset(self):
+        self.board.reset()
+        self.player.reset()
+        self.ai.reset()
+        for power_up in self.power_ups:
+            power_up.reset()
+        self.timer = 30
+        self.scene = "title"
 
     def play(self):
         # Game loop
+        pygame.display.flip()
+            
         running = True
         while running:
-            # Handle events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                    
-            # Cap the frame rate and get the time passed since the last frame
-            dt = self.clock.tick(self.FPS)
-            self.timer -= dt / 1000
-            
-            # Get the state of the keyboard
-            keys = pygame.key.get_pressed()
+            if self.scene == "title":
+                # Move to the game scene after the player clicks space
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            self.scene = "game"
+                            self.draw()
+                            pygame.time.wait(250)
+                    elif event.type == pygame.QUIT:
+                        running = False
+                
+            elif self.scene == "game":
+                # Handle events
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        
+                # Cap the frame rate and get the time passed since the last frame
+                dt = self.clock.tick(self.FPS)
+                self.timer -= dt / 1000
+                
+                # Get the state of the keyboard
+                keys = pygame.key.get_pressed()
 
-            # Move the character based on the key pressed
-            if keys[pygame.K_w]:
-                self.player.move("up")
+                # Move the character based on the key pressed
+                if keys[pygame.K_w]:
+                    self.player.move("up")
+                    
+                if keys[pygame.K_s]:
+                    self.player.move("down")
+                    
+                if keys[pygame.K_a]:
+                    self.player.move("left")
+                    
+                if keys[pygame.K_d]:
+                    self.player.move("right")
+                    
+                if self.player_on_power_up():
+                    power_up = self.player_on_power_up()
+                    power_up.collect()
+                    self.power_ups.remove(power_up)
                 
-            if keys[pygame.K_s]:
-                self.player.move("down")
-                
-            if keys[pygame.K_a]:
-                self.player.move("left")
-                
-            if keys[pygame.K_d]:
-                self.player.move("right")
-            
-            if self.player_caught():
-                self.game_over("AI caught you!")
-                running = False
-                
-            if self.player_on_power_up():
-                power_up = self.player_on_power_up()
-                power_up.collect()
-                self.power_ups.remove(power_up)
-                
-            if self.timer <= 0:
-                self.game_over("You win!")
-                running = False
-                
-            self.ai.move()
+                if self.player_caught():
+                    self.game_over("AI caught you!")
+                    running = False
+                    self.reset()
+                    # wait for 3 seconds
+                    self.play()
+                    
+                if self.timer <= 0:
+                    self.game_over("You win!")
+                    running = False
+                    self.reset()
+                    # wait for 3 seconds
+                    self.play()
+                    
+                self.ai.move()
             self.draw()
 
         # Quit the game

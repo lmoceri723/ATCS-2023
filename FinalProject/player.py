@@ -46,3 +46,9 @@ class Player:
         self.board.fill_position(new_x, new_y, 1)
         
         self.x, self.y = new_x, new_y
+        
+    def reset(self):
+        self.x = self.board.width // 2
+        self.y = self.board.width // 2 - 3
+        
+        self.board.fill_position(self.x, self.y, self.marker)
