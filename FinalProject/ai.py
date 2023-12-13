@@ -1,10 +1,13 @@
 import random
 import pygame
+from fsm import FSM
 
 class EnemyAI:
     def __init__(self, player):
         self.player = player
         self.board = player.board
+        self.fsm = FSM("idle")
+        self.initialize_fsm()
         
         self.x = 0
         self.y = 0
@@ -16,6 +19,26 @@ class EnemyAI:
         self.phase = False  # Set the enemy's phase status
         
         self.old_position_value = 0  # Set the enemy's old position value
+        
+    def initialize_fsm(self):
+        # Add transitions to the FSM
+        self.fsm.add_transition("GAME START", "idle", None, "move")
+        
+        self.fsm.add_transition("PHASE_LOST", "phase", None, "move")
+        self.fsm.add_transition("PHASE_LOST", "slow_phase", None, "slow")
+        
+        self.fsm.add_transition("POWERUP_LOST", "slow", None, "move")
+        self.fsm.add_transition("POWERUP_LOST", "slow_phase", None, "phase")
+        
+        self.fsm.add_transition("POWERUP_COLLECTED", "move", None, "slow")
+        self.fsm.add_transition("POWERUP_COLLECTED", "slow", None, "slow")
+        self.fsm.add_transition("POWERUP_COLLECTED", "phase", None, "slow_phase")
+        
+        self.fsm.add_transition("GAME_OVER", "move", None, "idle")
+        self.fsm.add_transition("GAME_OVER", "slow", None, "idle")
+        self.fsm.add_transition("GAME_OVER", "phase", None, "idle")
+        self.fsm.add_transition("GAME_OVER", "slow_phase", None, "idle")
+        
 
     def draw(self, screen):
         pygame.draw.rect(screen, (255, 0, 0), (self.x * self.board.spot_size, self.y * self.board.spot_size, self.board.spot_size, self.board.spot_size))
@@ -41,6 +64,7 @@ class EnemyAI:
             screen.blit(text, (650, 30))
     
     def process_freeze(self):
+        # If the enemy is frozen, check if it is time to unfreeze
         if self.slow:
             if random.randint(1, 20) == 1:
                 self.slow = False
@@ -53,26 +77,30 @@ class EnemyAI:
             
     def process_random_phase(self):
         if not self.phase:
-            # Generate a random number between 1 and 5, if it is 5 then make the enemy phase
+            # Generate a random number between 1 and 20, if it is 1 then make the enemy phase
             if random.randint(1, 20) == 1:
                 self.phase = True
         else:
+            # Generate a random number between 1 and 5, if it is 1 then make the enemy unphase
             if random.randint(1, 5) == 1:
                 self.phase = False
                 self.old_position_value = 0
     
     def move(self):
+        # Process the random phase and freeze status
         self.process_random_phase()
             
         if self.process_freeze() == "freeze":
             return
         
+        # Calculate the difference between the enemy and the player's x and y coordinates
         x_difference = abs(self.player.x - self.x)
         y_difference = abs(self.player.y - self.y)
 
         new_x = self.x
         new_y = self.y
 
+        # Try moving in the direction of the player
         if x_difference > y_difference:
             if self.player.x > self.x:
                 new_x += self.speed
@@ -84,16 +112,18 @@ class EnemyAI:
             else:
                 new_y -= self.speed
 
+        # Check if the new position is not an obstacle
         if self.phase == False and self.board.get_position(new_x, new_y) != 2:  # Check if the new position is not an obstacle
             self.board.fill_position(self.x, self.y, 0)
             self.board.fill_position(new_x, new_y, 3)
             self.x, self.y = new_x, new_y
-        elif self.phase == True:  # If the enemy is phasing, try moving in the new direction
+        # If the enemy is in phase, move to the new position regardless of whether it is an obstacle or not
+        elif self.phase == True:
             self.board.fill_position(self.x, self.y, self.old_position_value)
             self.old_position_value = self.board.get_position(new_x, new_y)
             self.board.fill_position(new_x, new_y, 3)
             self.x, self.y = new_x, new_y
-        else:  # If the new position is an obstacle, try moving in the other direction
+        else:  # If the new position is an obstacle and the enemy is not in phase, try moving in the other direction
             if x_difference > y_difference:
                 new_x = self.x  # Reset x
                 if self.player.y > self.y:

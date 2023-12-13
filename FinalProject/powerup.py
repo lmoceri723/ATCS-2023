@@ -15,14 +15,17 @@ class PowerUp:
         self.color = (0, 255, 255)
         
     def get_clear_position(self):
+        # Get a random position on the board
         self.x = random.randint(0, self.board.width - 1)
         self.y = random.randint(0, self.board.width - 1)
         
+        # Make sure the position is not an obstacle
         while self.board.get_position(self.x, self.y) != " " or self.y <= 1:
             self.x = random.randint(0, self.board.width - 1)
             self.y = random.randint(0, self.board.width - 1)
         
     def collect(self):
+        # Remove the power up from the board and freeze the AI
         self.board.fill_position(self.x, self.y, 0)
         self.ai.slow = True
         
@@ -30,5 +33,7 @@ class PowerUp:
         pygame.draw.rect(screen, self.color, (self.x * self.board.spot_size, self.y * self.board.spot_size, self.board.spot_size, self.board.spot_size))
         
     def reset(self):
+        # Remove the power up from the board and replot it a new position
+        self.board.fill_position(self.x, self.y, 0)
         self.get_clear_position()
         self.board.fill_position(self.x, self.y, 4)

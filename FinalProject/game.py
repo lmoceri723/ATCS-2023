@@ -33,6 +33,7 @@ class Game:
         self.player = Player(self.board, 800 // self.board_size, 800 // self.board_size)
         self.ai = EnemyAI(self.player)
         
+        # Set up the power ups
         self.power_ups = []
         for _ in range(4):
             self.power_ups.append(PowerUp(self.ai))
@@ -42,6 +43,7 @@ class Game:
     def draw(self):
         # Update the screen
         if self.scene == "game":
+            # Draw every component of the game
             self.screen.fill(self.screen_color)
             self.board.draw(self.screen)
             for power_up in self.power_ups:
@@ -51,7 +53,9 @@ class Game:
             self.ai.draw_state(self.screen)
             self.draw_timer()
             pygame.display.flip()
+            
         elif self.scene == "title":
+            # Draw every component of the title screen
             self.screen.fill(self.screen_color)
             self.draw_title()
             pygame.display.flip()
@@ -72,14 +76,9 @@ class Game:
             font.render("Press space to play.", True, (0, 0, 0)),
 ]
         # Draw the text object on the screen followed by the instructions
-        # Make the title at the top
-        # Make the instructions below the title with a gap inbetween the title and instructions
-        # Make the instructions fit on the screen
-        
         self.screen.blit(text, (self.screen_width // 2 - 200, self.screen_height // 2 - 200))
         for i in range(len(instructions)):
             self.screen.blit(instructions[i], (20, self.screen_height // 2 - 100 + i * 50))
-        
         
         pygame.display.flip()
     
@@ -126,14 +125,17 @@ class Game:
         
         if x_difference <= 1 and y_difference <= 1:
             return True
+        return False
         
     def player_on_power_up(self):
+        # See if the player has collected a power up
         for power_up in self.power_ups:
             if self.player.x == power_up.x and self.player.y == power_up.y:
                 return power_up
         return False
     
     def reset(self):
+        # Reset the game
         self.board.reset()
         self.player.reset()
         self.ai.reset()
@@ -173,38 +175,42 @@ class Game:
                 keys = pygame.key.get_pressed()
 
                 # Move the character based on the key pressed
-                if keys[pygame.K_w]:
+                if keys[pygame.K_w] or keys[pygame.K_UP]:
                     self.player.move("up")
                     
-                if keys[pygame.K_s]:
+                if keys[pygame.K_s] or keys[pygame.K_DOWN]:
                     self.player.move("down")
                     
-                if keys[pygame.K_a]:
+                if keys[pygame.K_a] or keys[pygame.K_LEFT]:
                     self.player.move("left")
                     
-                if keys[pygame.K_d]:
+                if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                     self.player.move("right")
                     
+                # Collect the powerup if the player is on it
                 if self.player_on_power_up():
                     power_up = self.player_on_power_up()
                     power_up.collect()
                     self.power_ups.remove(power_up)
                 
+                # Check if the player has been caught
                 if self.player_caught():
                     self.game_over("AI caught you!")
                     running = False
                     self.reset()
-                    # wait for 3 seconds
                     self.play()
                     
+                # Check if the player has won
                 if self.timer <= 0:
                     self.game_over("You win!")
                     running = False
                     self.reset()
-                    # wait for 3 seconds
                     self.play()
                     
+                # Move the AI
                 self.ai.move()
+                
+            # Draw the game
             self.draw()
 
         # Quit the game
