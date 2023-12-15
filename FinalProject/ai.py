@@ -1,3 +1,8 @@
+"""
+This file contains the EnemyAI class, which is used to control the enemy's movement and handle the enemy's state.
+
+@author: Landon Moceri (with the help of GitHub Copilot)
+"""
 import random
 import pygame
 from fsm import FSM

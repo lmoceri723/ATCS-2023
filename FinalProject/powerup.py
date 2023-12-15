@@ -1,5 +1,8 @@
-# Create a power up class that activates the AI's freeze when collected by the player and deletes itself from the board.
-# The power up should be a light blue square that is randomly placed on the board.
+"""
+This module contains the PowerUp class which is responsible for creating and drawing power ups.
+
+@author: Landon Moceri (with the help of GitHub Copilot)
+"""
 import random
 import pygame
 

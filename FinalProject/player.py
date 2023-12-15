@@ -1,3 +1,9 @@
+"""
+This file contains the Player class, which represents the player in the game.
+The Player class is responsible for moving the player and drawing the player.
+
+@author: Landon Moceri (with the help of GitHub Copilot)
+"""
 import pygame
 from board import Board
 

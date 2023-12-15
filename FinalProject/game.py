@@ -1,3 +1,10 @@
+"""
+This module contains the Game class which is responsible for running the game.
+The Game class is responsible for initializing the game, drawing the game, and handling events.
+The Game class also contains the game loop which is responsible for updating the game state and drawing the game.
+
+@author: Landon Moceri (with the help of GitHub Copilot)
+"""
 import pygame
 from board import Board
 from player import Player

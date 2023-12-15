@@ -1,3 +1,8 @@
+"""
+This file contains the Board class, which is used to represent the board in the game.
+
+@author: Landon Moceri (with the help of GitHub Copilot)
+"""
 import pygame
 
 class Board:

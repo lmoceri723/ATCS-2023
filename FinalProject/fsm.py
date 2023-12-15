@@ -56,7 +56,7 @@ class FSM:
         return self.state_transitions[(input_symbol, state)]
 
     def process(self, input_symbol):
-        """
+        """ 
         The main method that you call to process input. This may
         cause the FSM to change state and call an action. This method calls
         get_transition() to find the action and next_state associated with the
