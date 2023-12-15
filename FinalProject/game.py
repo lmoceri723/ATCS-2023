@@ -94,6 +94,9 @@ class Game:
         
         
     def game_over(self, message):
+        # Process the game over state change
+        self.ai.fsm.process("GAME_OVER")
+        
         # Draw the board
         self.draw()
         
@@ -134,19 +137,27 @@ class Game:
                 return power_up
         return False
     
+    def reset_power_ups(self):
+        # Reset the power ups
+        self.power_ups = []
+        for _ in range(4):
+            self.power_ups.append(PowerUp(self.ai))
+    
     def reset(self):
         # Reset the game
         self.board.reset()
         self.player.reset()
         self.ai.reset()
-        for power_up in self.power_ups:
-            power_up.reset()
+        self.reset_power_ups()
         self.timer = 30
         self.scene = "title"
 
     def play(self):
         # Game loop
         pygame.display.flip()
+        
+        # Process the game start state change
+        self.ai.fsm.process("GAME_START")
             
         running = True
         while running:
@@ -192,6 +203,8 @@ class Game:
                     power_up = self.player_on_power_up()
                     power_up.collect()
                     self.power_ups.remove(power_up)
+                    # Process the power up collected state change
+                    self.ai.fsm.process("POWERUP_COLLECTED")
                 
                 # Check if the player has been caught
                 if self.player_caught():

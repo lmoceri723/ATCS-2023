@@ -32,8 +32,3 @@ class PowerUp:
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x * self.board.spot_size, self.y * self.board.spot_size, self.board.spot_size, self.board.spot_size))
         
-    def reset(self):
-        # Remove the power up from the board and replot it a new position
-        self.board.fill_position(self.x, self.y, 0)
-        self.get_clear_position()
-        self.board.fill_position(self.x, self.y, 4)

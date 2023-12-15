@@ -15,17 +15,16 @@ class EnemyAI:
         
         self.speed = 1  # Set the enemy's speed
         self.clock = 0  # Set the enemy's clock
-        self.slow = False  # Set the enemy's slow status
-        self.phase = False  # Set the enemy's phase status
-        
-        self.old_position_value = 0  # Set the enemy's old position value
         
     def initialize_fsm(self):
         # Add transitions to the FSM
-        self.fsm.add_transition("GAME START", "idle", None, "move")
+        self.fsm.add_transition("GAME_START", "idle", None, "move")
         
         self.fsm.add_transition("PHASE_LOST", "phase", None, "move")
         self.fsm.add_transition("PHASE_LOST", "slow_phase", None, "slow")
+        
+        self.fsm.add_transition("PHASE_COLLECTED", "move", None, "phase")
+        self.fsm.add_transition("PHASE_COLLECTED", "slow", None, "slow_phase")
         
         self.fsm.add_transition("POWERUP_LOST", "slow", None, "move")
         self.fsm.add_transition("POWERUP_LOST", "slow_phase", None, "phase")
@@ -48,7 +47,7 @@ class EnemyAI:
         font = pygame.font.Font('freesansbold.ttf', 16)
 
         # If the enemy is slow, draw the slow status
-        if self.slow:
+        if self.is_slow():
             # Create a text surface object
             text = font.render('Enemy is slow', True, (0, 0, 0), (255, 255, 255))
 
@@ -56,7 +55,7 @@ class EnemyAI:
             screen.blit(text, (675, 10))
             
         # If the enemy is in phase, draw the phase status
-        if self.phase:
+        if self.is_phase():
             # Create a text surface object
             text = font.render('Enemy is phasing', True, (0, 0, 0), (255, 255, 255))
 
@@ -65,9 +64,10 @@ class EnemyAI:
     
     def process_freeze(self):
         # If the enemy is frozen, check if it is time to unfreeze
-        if self.slow:
+        if self.is_slow():
             if random.randint(1, 20) == 1:
-                self.slow = False
+                # Process the power up lost state change
+                self.fsm.process("POWERUP_LOST")
                 self.clock = 0
             elif self.clock % 2 == 0:
                 self.clock += 1
@@ -76,15 +76,25 @@ class EnemyAI:
                 self.clock += 1
             
     def process_random_phase(self):
-        if not self.phase:
-            # Generate a random number between 1 and 20, if it is 1 then make the enemy phase
-            if random.randint(1, 20) == 1:
-                self.phase = True
-        else:
+        # Process the random phase status
+        if self.is_phase():
             # Generate a random number between 1 and 5, if it is 1 then make the enemy unphase
             if random.randint(1, 5) == 1:
-                self.phase = False
-                self.old_position_value = 0
+                # Process the phase lost state change
+                self.fsm.process("PHASE_LOST")
+        else:
+            # Generate a random number between 1 and 20, if it is 1 then make the enemy phase
+            if random.randint(1, 20) == 1:
+                # Process the phase collected state change
+                self.fsm.process("PHASE_COLLECTED")
+                
+    def is_slow(self):
+        # Check if the enemy is slow
+        return self.fsm.current_state == "slow" or self.fsm.current_state == "slow_phase"
+    
+    def is_phase(self):
+        # Check if the enemy is in phase
+        return self.fsm.current_state == "phase" or self.fsm.current_state == "slow_phase"
     
     def move(self):
         # Process the random phase and freeze status
@@ -112,15 +122,9 @@ class EnemyAI:
             else:
                 new_y -= self.speed
 
-        # Check if the new position is not an obstacle
-        if self.phase == False and self.board.get_position(new_x, new_y) != 2:  # Check if the new position is not an obstacle
+        # Check if the new position is not an obstacle or if the enemy is in phase
+        if self.board.get_position(new_x, new_y) != 2 or self.is_phase():  # Check if the new position is not an obstacle
             self.board.fill_position(self.x, self.y, 0)
-            self.board.fill_position(new_x, new_y, 3)
-            self.x, self.y = new_x, new_y
-        # If the enemy is in phase, move to the new position regardless of whether it is an obstacle or not
-        elif self.phase == True:
-            self.board.fill_position(self.x, self.y, self.old_position_value)
-            self.old_position_value = self.board.get_position(new_x, new_y)
             self.board.fill_position(new_x, new_y, 3)
             self.x, self.y = new_x, new_y
         else:  # If the new position is an obstacle and the enemy is not in phase, try moving in the other direction
@@ -150,6 +154,3 @@ class EnemyAI:
         self.board.fill_position(self.x, self.y, 3)
         
         self.clock = 0
-        self.slow = False
-        self.phase = False
-        self.old_position_value = 0
