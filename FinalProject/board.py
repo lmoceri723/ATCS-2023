@@ -17,6 +17,8 @@ class Board:
         for i in range(self.width):
             line = f.readline()
             for j in range(self.width):
+                if line[j] == " ":
+                    self.fill_position(i, j, 0)
                 if line[j] == "-":
                     self.fill_position(i, j, 2)
         

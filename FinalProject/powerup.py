@@ -20,7 +20,7 @@ class PowerUp:
         self.y = random.randint(0, self.board.width - 1)
         
         # Make sure the position is not an obstacle
-        while self.board.get_position(self.x, self.y) != " " or self.y <= 1:
+        while self.board.get_position(self.x, self.y) != 0 or self.y <= 1:
             self.x = random.randint(0, self.board.width - 1)
             self.y = random.randint(0, self.board.width - 1)
         
